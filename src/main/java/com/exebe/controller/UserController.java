@@ -3,7 +3,9 @@ package com.exebe.controller;
 
 import com.exebe.base.BaseController;
 import com.exebe.base.BaseResponse;
+import com.exebe.constant.ErrorCode;
 import com.exebe.constant.UserRole;
+import com.exebe.dto.user.UserProfileRequestDTO;
 import com.exebe.dto.user.UserProfileResponseDTO;
 import com.exebe.entity.User;
 import com.exebe.exception.CustomException;
@@ -66,10 +68,21 @@ public class UserController extends BaseController {
                         .username(user.getUsername())
                         .fullName(user.getFullName())
                         .email(user.getEmail())
+                        .phone(user.getPhone())
+                        .address(user.getAddress())
                         .isEnable(user.isEnable())
                         .role(user.getRole().name())
                         .build();
 
         return wrapSuccess(dto);
+    }
+
+    @PostMapping("/me")
+    public BaseResponse<String> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody UserProfileRequestDTO request) {
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(()
+                -> new CustomException(ErrorCode.NOT_FOUND.getCode(), "User not found", HttpStatus.NOT_FOUND));
+        return userService.updateProfile(user, request);
     }
 }

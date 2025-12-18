@@ -1,16 +1,21 @@
 package com.exebe.service;
 
 
+import com.exebe.base.BaseResponse;
 import com.exebe.base.PageDTO;
+import com.exebe.constant.ErrorCode;
 import com.exebe.constant.UserRole;
 import com.exebe.dto.user.UserCreateRequestDTO;
 import com.exebe.dto.user.UserDTO;
+import com.exebe.dto.user.UserProfileRequestDTO;
 import com.exebe.entity.User;
 import com.exebe.exception.CustomException;
 import com.exebe.exception.NoResultException;
 import com.exebe.handler.UserHandler;
 import com.exebe.mapper.UserMapper;
 import com.exebe.repository.UserRepository;
+import com.exebe.util.Validate;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -66,6 +71,62 @@ public class UserService {
         userRepository.save(user);
 
         return UserMapper.toUserDTO(user);
+    }
+
+    public BaseResponse<String> updateProfile(User user, UserProfileRequestDTO request){
+        String typeUpdate = request.getType();
+        switch (typeUpdate) {
+            case "BASIC":
+                String validationMessage = validateCaseBasic(request);
+                if(validationMessage != null){
+                    return BaseResponse.failure(validationMessage, ErrorCode.INVALID_INPUT.getCode());
+                }
+                user.setFullName(request.getFullName());
+                user.setPhone(request.getPhone());
+                try {
+                    userRepository.save(user);
+                } catch (Exception e){
+                    return BaseResponse.failure("Update profile failed", ErrorCode.INTERNAL_SERVER_ERROR.getCode());
+                }
+                return BaseResponse.success("Update profile successfully");
+            case "ADDRESS":
+                String validationAddressMessage = validateCaseAddress(request);
+                if(validationAddressMessage != null){
+                    return BaseResponse.failure(validationAddressMessage, ErrorCode.INVALID_INPUT.getCode());
+                }
+                user.setAddress(request.getAddress());
+                try {
+                    userRepository.save(user);
+                } catch (Exception e){
+                    return BaseResponse.failure("Update profile failed", ErrorCode.INTERNAL_SERVER_ERROR.getCode());
+                }
+                return BaseResponse.success("Update address successfully");
+            default:
+                throw new CustomException(ErrorCode.BAD_REQUEST.getCode(), "Type update is invalid", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private String validateCaseBasic(UserProfileRequestDTO request){
+        if(request.getFullName() == null || request.getFullName().isEmpty()){
+            return "Full name is required";
+        }
+        if(request.getPhone() == null || request.getPhone().isEmpty()){
+            return "Phone is required";
+        }
+        if(!Validate.isValidPhone(request.getPhone())){
+            return "Phone is invalid";
+        }
+        if (!Validate.isValidFullName(request.getFullName())) {
+            return "Full name is invalid";
+        }
+        return null;
+    }
+
+    private String validateCaseAddress(UserProfileRequestDTO request){
+        if(request.getAddress() == null || request.getAddress().isEmpty()){
+            return "Address is required";
+        }
+        return null;
     }
 
 }

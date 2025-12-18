@@ -43,6 +43,14 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
+    @Size(max = 10)
+    @Column(name = "phone")
+    private String phone;
+
+    @Size(max = 500)
+    @Column(name = "address")
+    private String address;
+
     @Column(name = "is_enable", nullable = false)
     private boolean isEnable = true;
 }
