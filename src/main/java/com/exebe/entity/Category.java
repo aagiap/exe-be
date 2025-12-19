@@ -1,8 +1,9 @@
 package com.exebe.entity;
 
-import com.exebe.constant.CategoryType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
 
@@ -20,11 +21,15 @@ public class Category {
     @Column(name = "category_id", nullable = false)
     private Long id;
 
-    @Column(nullable = false)
-    private String name; // Ví dụ: "Nội thất mây tre"
+    @Nationalized
+    @Size(max = 1000)
+    @Column(name = "name", length = 1000)
+    private String name;
 
-    @Enumerated(EnumType.STRING)
-    private CategoryType type; // Dùng để filter trên Nav Bar
+    @Nationalized
+    @Size(max = 1000)
+    @Column(name = "description", length = 1000)
+    private String description;
 
     @OneToMany(mappedBy = "category")
     private List<Product> products;
