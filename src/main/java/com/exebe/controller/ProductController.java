@@ -4,12 +4,8 @@ import com.exebe.base.BaseController;
 import com.exebe.base.BaseResponse;
 import com.exebe.base.PageDTO;
 import com.exebe.dto.product.ProductDTO;
-import com.exebe.entity.Product;
 import com.exebe.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
