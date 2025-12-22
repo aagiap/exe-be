@@ -1,0 +1,18 @@
+package com.exebe.repository;
+
+import com.exebe.entity.Cart;
+import com.exebe.entity.CartItem;
+import com.exebe.entity.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface CartItemRepository extends JpaRepository<CartItem,Long> {
+    Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
+
+    void deleteByCartAndProduct(Cart cart, Product product);
+
+    void deleteAllByCart(Cart cart);
+}
