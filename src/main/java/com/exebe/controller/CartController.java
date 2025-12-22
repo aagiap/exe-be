@@ -42,4 +42,31 @@ public class CartController extends BaseController {
                 )
         );
     }
+
+    @DeleteMapping("/item/{productId}")
+    public BaseResponse<CartDTO> deleteItem(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long productId
+    ) {
+        return wrapSuccess(
+                cartService.deleteItemFromCart(
+                        userDetails.getUsername(),
+                        productId
+                )
+        );
+    }
+    @PutMapping("/item/{productId}")
+    public BaseResponse<CartDTO> updateQuantity(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long productId,
+            @RequestParam int quantity
+    ) {
+        return wrapSuccess(
+                cartService.updateQuantity(
+                        userDetails.getUsername(),
+                        productId,
+                        quantity
+                )
+        );
+    }
 }

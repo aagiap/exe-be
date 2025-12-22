@@ -94,19 +94,72 @@ public class CartService {
                 );
     }
 
+
     private void recalculateTotal(Cart cart) {
         double total = cart.getCartItems().stream()
                 .mapToDouble(item -> {
-                    Product p = item.getProduct();
-                    double price = p.getDiscountedPrice() != null
-                            ? p.getDiscountedPrice()
-                            : p.getOriginalPrice();
+                    double price = item.getProduct().getDiscountedPrice() != null
+                            ? item.getProduct().getDiscountedPrice()
+                            : item.getProduct().getOriginalPrice();
                     return price * item.getQuantity();
                 })
                 .sum();
 
         cart.setTotalAmount(total);
-        cartRepository.save(cart);
+    }
+
+    @Transactional
+    public CartDTO deleteItemFromCart(String username, Long productId) {
+
+        User user = getUserByUsername(username);
+
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        CartItem cartItem = cartItemRepository
+                .findByCartAndProduct(cart, product)
+                .orElseThrow(() -> new RuntimeException("Item not found in cart"));
+
+
+        cart.getCartItems().remove(cartItem);
+        cartItemRepository.delete(cartItem);
+        recalculateTotal(cart);
+        return CartMapper.toCartDTO(cart);
+    }
+
+    @Transactional
+    public CartDTO updateQuantity(
+            String username,
+            Long productId,
+            int quantity
+    ) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity must be >= 0");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        CartItem cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not in cart"));
+
+        if (quantity == 0) {
+            cart.getCartItems().remove(cartItem);
+        } else {
+            cartItem.setQuantity(quantity);
+        }
+
+        recalculateTotal(cart);
+
+        return CartMapper.toCartDTO(cart);
     }
 }
 
