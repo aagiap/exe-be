@@ -26,17 +26,4 @@ public class CartItem {
     private Product product;
 
     private Integer quantity;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CartItem)) return false;
-        CartItem that = (CartItem) o;
-        return id != null && id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
